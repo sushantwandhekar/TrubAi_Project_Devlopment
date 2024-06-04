@@ -1,0 +1,31 @@
+name: Update Glue Scripts and ETL Job
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # This allows manual triggering of the workflow
+
+jobs:
+  update-glue-scripts-and-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Zip files
+      run: zip -r scripts.zip .github/workflows # Replace '.github/workflows' with the path to your scripts folder
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Sync Zip folder to S3
+      run: aws s3 cp scripts.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd/
+
+    - name: Create Glue ETL Job
+      run: python create_glue_job.py # Replace this with the command to execute your Python script for creating the Glue ETL job
