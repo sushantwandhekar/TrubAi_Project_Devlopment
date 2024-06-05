@@ -48,7 +48,8 @@ def update_glue_job(job_name,script_name, script_location, role_arn, glue_client
                 'DefaultArguments': {
                     '--job-language': 'python',
                     '--extra-py-files': extra_files
-                },Connections={
+                },
+                'Connections':{
                     'Connections': list_connec
                 },'WorkerType': 'G.1X',
                 'NumberOfWorkers': 2,
