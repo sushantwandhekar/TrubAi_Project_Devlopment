@@ -20,7 +20,6 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
             WorkerType='G.1X',
             NumberOfWorkers=2,
             Timeout=120,
-            MaxCapacity=5.0,
             MaxRetries=0
         )
         print("Glue ETL Job created successfully:", response['Name'])
