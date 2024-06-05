@@ -78,7 +78,7 @@ def update_glue_job(job_name,script_name, script_location, role_arn, glue_client
 def main():
     list_connec= ['Redshift connection_trubai_dw']
     extra_files = 's3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/utils.zip'
-    job_name = "automated_glue_job"
+    job_name = "main"
     script_location = "s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py"
     role_arn = "arn:aws:iam::311373145380:role/trubai_dev_glue_role"
     region_name = "us-east-1"
