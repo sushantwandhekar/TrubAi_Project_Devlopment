@@ -26,5 +26,9 @@ jobs:
 
     - name: Sync Zip folder to S3
       run: aws s3 cp utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/
+      
+    - name: install boto3
+      run : pip inatsll boto3
+      
     - name: Create Glue ETL Job
       run: python .github/workflows/create_glue_job.py # Replace this with the command to execute your Python script for creating the Glue ETL job
