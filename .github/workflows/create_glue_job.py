@@ -1,4 +1,5 @@
 import boto3
+import hashlib
 
 def job_exists(glue_client, job_name):
     try:
@@ -60,7 +61,16 @@ def update_glue_job(job_name,script_name, script_location, role_arn, glue_client
         print("Glue ETL Job updated successfully:", response['JobName'])
     except Exception as e:
         print("Error updating Glue ETL Job:", str(e))
+        
+def calculate_s3_object_md5(s3_client, bucket_name, key):
+    obj = s3_client.get_object(Bucket=bucket_name, Key=key)
+    md5 = hashlib.md5(obj['Body'].read()).hexdigest()
+    return md5
 
+def calculate_file_md5(file_path):
+    with open(file_path, 'rb') as f:
+        md5 = hashlib.md5(f.read()).hexdigest()
+    return md5
 
 
 # def main():
@@ -70,9 +80,7 @@ def update_glue_job(job_name,script_name, script_location, role_arn, glue_client
 #     script_location = "s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py" # Replace with your S3 path to the zip folder
 #     role_arn = "arn:aws:iam::311373145380:role/trubai_dev_glue_role" # Replace with your Glue service role ARN
 #     region_name = "us-east-1" # Replace with your AWS region
-
 #     glue_client = boto3.client('glue', region_name=region_name)
-
 #     create_glue_job(job_name, script_location, role_arn, glue_client,list_connec,extra_files)
 
 def main():
@@ -82,9 +90,14 @@ def main():
     script_location = "s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py"
     role_arn = "arn:aws:iam::311373145380:role/trubai_dev_glue_role"
     region_name = "us-east-1"
+    
+    s3_bucket_name = "data-ingestion-bucket-trubai-dev"
+    s3_key = "glue_cicd_automation/utils.zip"
+    local_script_path = ".github/workflows/utils.zip"
 
     glue_client = boto3.client('glue', region_name=region_name)
-
+    s3_client = boto3.client('s3', region_name=region_name)
+    
     # Check if the job already exists
     exists, job_info = job_exists(glue_client, job_name)
 
@@ -93,12 +106,22 @@ def main():
         create_glue_job(job_name, script_location, role_arn,glue_client,list_connec, extra_files)
     else:
         # Job exists, check if the script is updated
-        current_script_location = job_info['Command']['ScriptLocation']
-        if current_script_location != script_location:
-            # Update the job with the new script location
-            update_glue_job(job_name, script_location, role_arn,glue_client,list_connec,extra_files)
-        else:
-            print("Job already exists with the same script. No update needed.")
+        # current_script_location = job_info['Command']['ScriptLocation']
+        # if current_script_location != script_location:
+        #     # Update the job with the new script location
+        #     update_glue_job(job_name, script_location, role_arn,glue_client,list_connec,extra_files)
+        # else:
+        #     print("Job already exists with the same script. No update needed.")
+        try:
+            current_script_md5 = calculate_s3_object_md5(s3_client, s3_bucket_name, s3_key)
+            new_script_md5 = calculate_file_md5(local_script_path)
+            if current_script_md5 != new_script_md5:
+                # Update the job with the new script location
+                update_glue_job(job_name, script_location, role_arn,glue_client,list_connec,extra_files)
+            else:
+                print("Job already exists with the same script. No update needed.")
+        except Exception as e:
+            print("Error comparing scripts:", str(e))
 
 
 if __name__ == "__main__":
