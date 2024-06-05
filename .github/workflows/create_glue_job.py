@@ -1,25 +1,30 @@
 import boto3
 
-def create_glue_job(job_name, script_location, role_arn, glue_client):
+def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec):
     try:
         response = glue_client.create_job(
             Name=job_name,
             Role=role_arn,
             Command={
-                'Name': 'glueetl',
+                'Name': 'main.py',
                 'ScriptLocation': script_location
             },
             DefaultArguments={
-                '--job-language': 'python'
+                '--job-language': 'python',
+                '--extra-py-files': script_location
             },
-            Timeout=240,
-            MaxCapacity=5.0
+            Connections={
+                'Connections': list_connec
+            },Timeout=120,
+            MaxCapacity=5.0,
+            MaxRetries=0
         )
         print("Glue ETL Job created successfully:", response['Name'])
     except Exception as e:
         print("Error creating Glue ETL Job:", str(e))
 
 def main():
+    list_connec= ['Redshift connection_trubai_dw']
     job_name = "automated_glue_job"
     script_location = "s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/utils.zip" # Replace with your S3 path to the zip folder
     role_arn = "arn:aws:iam::311373145380:role/trubai_dev_glue_role" # Replace with your Glue service role ARN
@@ -27,7 +32,7 @@ def main():
 
     glue_client = boto3.client('glue', region_name=region_name)
 
-    create_glue_job(job_name, script_location, role_arn, glue_client)
+    create_glue_job(job_name, script_location, role_arn, glue_client,list_connec)
 
 if __name__ == "__main__":
     main()
