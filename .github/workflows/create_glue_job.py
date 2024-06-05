@@ -25,7 +25,7 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
             },
             Connections={
                 'Connections': list_connec
-            },GlueVersion='2.0',
+            },GlueVersion='4.0',
             WorkerType='G.1X',
             NumberOfWorkers=2,
             Timeout=120,
@@ -54,7 +54,7 @@ def update_glue_job(job_name,script_location, role_arn, glue_client,list_connec,
                     'Connections': list_connec
                 },'WorkerType': 'G.1X',
                 'NumberOfWorkers': 2,
-                'GlueVersion': '2.0',
+                'GlueVersion': '4.0',
                 'Timeout': 120,
             }
         )
