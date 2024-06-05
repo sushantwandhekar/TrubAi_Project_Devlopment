@@ -7,7 +7,8 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
             Role=role_arn,
             Command={
                 'Name': 'main.py',
-                'ScriptLocation': script_location
+                'ScriptLocation': script_location,
+                'PythonVersion': '3' 
             },
             DefaultArguments={
                 '--job-language': 'python',
@@ -15,7 +16,9 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
             },
             Connections={
                 'Connections': list_connec
-            },GlueVersion="3.0",
+            },GlueVersion='2.0',
+            WorkerType='G.1X',
+            NumberOfWorkers=2,
             Timeout=120,
             MaxCapacity=5.0,
             MaxRetries=0
