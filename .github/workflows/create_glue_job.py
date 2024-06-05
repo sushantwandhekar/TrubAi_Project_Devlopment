@@ -1,6 +1,6 @@
 import boto3
 
-def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec):
+def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec,extra_files):
     try:
         response = glue_client.create_job(
             Name=job_name,
@@ -11,7 +11,7 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
             },
             DefaultArguments={
                 '--job-language': 'python',
-                '--extra-py-files': script_location
+                '--extra-py-files': extra_files
             },
             Connections={
                 'Connections': list_connec
@@ -25,14 +25,15 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
 
 def main():
     list_connec= ['Redshift connection_trubai_dw']
+    extra_files = ['s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/utils.zip']
     job_name = "automated_glue_job"
-    script_location = "s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/utils.zip" # Replace with your S3 path to the zip folder
+    script_location = "s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py" # Replace with your S3 path to the zip folder
     role_arn = "arn:aws:iam::311373145380:role/trubai_dev_glue_role" # Replace with your Glue service role ARN
     region_name = "us-east-1" # Replace with your AWS region
 
     glue_client = boto3.client('glue', region_name=region_name)
 
-    create_glue_job(job_name, script_location, role_arn, glue_client,list_connec)
+    create_glue_job(job_name, script_location, role_arn, glue_client,list_connec,extra_files)
 
 if __name__ == "__main__":
     main()
