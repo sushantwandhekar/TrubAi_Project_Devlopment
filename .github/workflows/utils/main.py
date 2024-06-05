@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 from awsglue.context import GlueContext
 from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
-
+import boto3
 
 # Import the utils module
 from utils import read_data_from_s3
