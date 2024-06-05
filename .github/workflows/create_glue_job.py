@@ -41,7 +41,7 @@ def update_glue_job(job_name,script_name, script_location, role_arn, glue_client
             JobUpdate={
                 'Role': role_arn,
                 'Command': {
-                    'Name': job_name
+                    'Name': job_name,
                     'ScriptLocation': script_location,
                     'PythonVersion': '3'
                 },
