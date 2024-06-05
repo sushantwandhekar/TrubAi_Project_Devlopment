@@ -17,7 +17,7 @@ jobs:
     - name: Zip files
       run: |
         cd .github/workflows
-        zip -r utils.zip utils # Replace '.github/workflows' with the path to your scripts folder
+        zip -r utils.zip# Replace '.github/workflows' with the path to your scripts folder
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
