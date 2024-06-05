@@ -25,4 +25,4 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Sync Zip folder to S3
-      run: aws s3 sync utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/ 
+      run: aws s3 cp utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/ 
