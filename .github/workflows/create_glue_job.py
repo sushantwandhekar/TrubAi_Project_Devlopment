@@ -11,7 +11,7 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
                 'PythonVersion': '3' 
             },
             DefaultArguments={
-                '--job-language': 'python',
+                # '--job-language': 'python',
                 '--extra-py-files': extra_files
             },
             Connections={
