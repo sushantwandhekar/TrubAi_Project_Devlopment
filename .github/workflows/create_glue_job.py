@@ -92,8 +92,8 @@ def main():
     region_name = "us-east-1"
     
     s3_bucket_name = "data-ingestion-bucket-trubai-dev"
-    s3_key = "glue_cicd_automation/utils.zip"
-    local_script_path = ".github/workflows/utils.zip"
+    s3_key = "glue_cicd_automation/main.py"
+    local_script_path = ".github/workflows/utils/main.py"
 
     glue_client = boto3.client('glue', region_name=region_name)
     s3_client = boto3.client('s3', region_name=region_name)
