@@ -114,7 +114,9 @@ def main():
         #     print("Job already exists with the same script. No update needed.")
         try:
             current_script_md5 = calculate_s3_object_md5(s3_client, s3_bucket_name, s3_key)
+            print(current_script_md5)
             new_script_md5 = calculate_file_md5(local_script_path)
+            print(new_script_md5)
             if current_script_md5 != new_script_md5:
                 # Update the job with the new script location
                 update_glue_job(job_name, script_location, role_arn,glue_client,list_connec,extra_files)
