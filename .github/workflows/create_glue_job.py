@@ -15,7 +15,8 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
             },
             Connections={
                 'Connections': list_connec
-            },Timeout=120,
+            },GlueVersion="3.0",
+            Timeout=120,
             MaxCapacity=5.0,
             MaxRetries=0
         )
