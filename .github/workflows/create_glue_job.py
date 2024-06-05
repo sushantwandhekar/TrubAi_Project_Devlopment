@@ -35,7 +35,7 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,list_connec
     except Exception as e:
         print("Error creating Glue ETL Job:", str(e))
 
-def update_glue_job(job_name,script_name, script_location, role_arn, glue_client,list_connec,extra_files):
+def update_glue_job(job_name,script_location, role_arn, glue_client,list_connec,extra_files):
     try:
         response = glue_client.update_job(
             JobName=job_name,
