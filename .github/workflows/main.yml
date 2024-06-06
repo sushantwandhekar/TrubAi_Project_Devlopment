@@ -14,6 +14,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+
     - name: sync ETL file 
       run: |
            cd .github/workflows/utils
@@ -24,13 +32,6 @@ jobs:
         cd .github/workflows
         zip -r utils.zip utils 
       # Replace '.github/workflows' with the path to your scripts folder
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Sync Zip folder to S3
       run: aws s3 cp .github/workflows/utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/
