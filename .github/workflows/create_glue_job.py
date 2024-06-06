@@ -162,6 +162,7 @@ def main(job_name):
         except Exception as e:
             print("Error comparing scripts:", str(e))
 
+main(transit_zone)
 
 if __name__ == "__main__":
-    main(main)
+    main()
