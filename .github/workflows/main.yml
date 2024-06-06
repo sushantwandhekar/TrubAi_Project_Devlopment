@@ -23,9 +23,7 @@ jobs:
 
 
     - name: sync ETL file 
-      run: |
-           cd .github/workflows/utils
-           aws s3 sync main.py s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py
+      run: aws s3 sync .github/workflows/main.py s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py
 
     - name: Zip files
       run: |
