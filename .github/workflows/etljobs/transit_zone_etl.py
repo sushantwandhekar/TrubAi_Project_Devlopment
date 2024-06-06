@@ -17,6 +17,18 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
+def job_exists(glue_client, job_name):
+    """
+        function will check if the job_name is same as the passed job name in the function call
+        params:
+            glue_client : boto3 will retrive the glue client
+            job_name : job_name /file name of the ETL job 
+    """
+    try:
+        response = glue_client.get_job(JobName=job_name)
+        return True, response['Job']
+    except glue_client.exceptions.EntityNotFoundException:
+        return False, None
 
 def read_data_from_s3(spark,s3_path, file_format, file_options):
     # Read data into a Spark DataFrame
