@@ -31,7 +31,7 @@ jobs:
       run: aws s3 cp .github/workflows/utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/
 
     - name: sync ETL file 
-      run: aws s3 sync .github/workflows/utils/main.py s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py
+      run: aws s3 sync .github/workflows/utils/main.py s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/
       
     - name: install boto3
       run: pip install boto3
