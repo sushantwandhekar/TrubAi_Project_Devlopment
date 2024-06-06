@@ -128,14 +128,15 @@ def calculate_file_md5(file_path):
 
 
 def main(job_name):
-
+    
+    s3_bucket_name = os.getenv('S3_BUCKET_NAME')
     glue_connection_list = os.getenv('GLUE_CONNECTION_LIST').split(',')
     extra_python_files = os.getenv('EXTRA_PYTHON_FILES')
     script_location = f"s3://{s3_bucket_name}/glue_cicd_automation/ETL jobs/{job_name}.py"
     role_arn = os.getenv('ROLE_ARN')
     region_name = os.getenv('REGION_NAME')
 
-    s3_bucket_name = os.getenv('S3_BUCKET_NAME')
+    
     s3_key = f"glue_cicd_automation/ETL jobs/{job_name}.py"
     local_script_path = f".github/workflows/{job_name+'.py'}"
     glue_client = boto3.client('glue', region_name=region_name)
