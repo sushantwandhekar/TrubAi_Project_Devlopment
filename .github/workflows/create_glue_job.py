@@ -165,5 +165,5 @@ def main(job_name):
 job_name = 'transit_zone'
 main(job_name)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
