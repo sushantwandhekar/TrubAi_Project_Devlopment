@@ -14,6 +14,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: sync ETL file 
+      run: |
+           cd .github/workflows/utils
+           aws s3 sync main.py s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py
+
     - name: Zip files
       run: |
         cd .github/workflows
@@ -30,10 +35,6 @@ jobs:
     - name: Sync Zip folder to S3
       run: aws s3 cp .github/workflows/utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/
 
-    - name: sync ETL file 
-      run: |
-           cd .github/workflows/utils
-           aws s3 sync main.py s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/main.py
       
     - name: install boto3
       run: pip install boto3
