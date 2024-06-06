@@ -1,6 +1,7 @@
 import boto3
 import hashlib
 import os
+import time
 
 def job_exists(glue_client, job_name):
     """
@@ -154,6 +155,7 @@ def main(job_name):
             print(current_script_md5)
             new_script_md5 = calculate_file_md5(local_script_path)
             print(new_script_md5)
+            time.sleep(10)
             if current_script_md5 != new_script_md5:
                 # Update the job with the new script location
                 update_glue_job(job_name, script_location, role_arn,glue_client,glue_connection_list,extra_python_files)
