@@ -9,6 +9,7 @@ on:
 jobs:
   update-glue-scripts-and-job:
     runs-on: ubuntu-latest
+    environment: trubai_dev
 
     steps:
     - name: Checkout repository
@@ -34,6 +35,13 @@ jobs:
     - name: Sync Zip folder to S3
       run: aws s3 cp .github/workflows/utils.zip s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/
 
+    - name: Set environment variables from GitHub secrets
+      run: |
+        echo "GLUE_CONNECTION_LIST=${{ secrets.GLUE_CONNECTION_LIST }}" >> $GITHUB_ENV
+        echo "EXTRA_PYTHON_FILES=${{ secrets.EXTRA_PYTHON_FILES }}" >> $GITHUB_ENV
+        echo "ROLE_ARN=${{ secrets.ROLE_ARN }}" >> $GITHUB_ENV
+        echo "REGION_NAME=${{ secrets.REGION_NAME }}" >> $GITHUB_ENV
+        echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> $GITHUB_ENV
       
     - name: install boto3
       run: pip install boto3
