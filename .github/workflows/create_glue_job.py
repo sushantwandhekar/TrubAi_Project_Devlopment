@@ -138,7 +138,7 @@ def main(job_name):
 
     
     s3_key = f"glue_cicd_automation/ETL jobs/{job_name}.py"
-    local_script_path = f".github/workflows/{job_name+'.py'}"
+    local_script_path = f".github/workflows/{job_name}.py"
     glue_client = boto3.client('glue', region_name=region_name)
     s3_client = boto3.client('s3', region_name=region_name)
     
