@@ -33,7 +33,7 @@ jobs:
       # Replace '.github/workflows' with the path to your scripts folder
 
     - name: Sync Zip folder to S3
-      run: aws s3 cp .github/workflows/utils.zip https://data-ingestion-bucket-trubai-dev.s3.amazonaws.com/trubai-gov-data-engineering/development/python_library/
+      run: aws s3 cp .github/workflows/utils.zip s3://data-ingestion-bucket-trubai-dev/trubai-gov-data-engineering/development/python_library/
 
     - name: Set environment variables from GitHub secrets
       run: |
