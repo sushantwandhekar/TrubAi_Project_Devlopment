@@ -27,7 +27,7 @@ def read_data_from_s3(spark,file_path, file_format, file_options):
         raise ValueError("Unsupported file format")
     return df
 
-def write_to_redshift(df, redshift_connection_name, table_name, redshift_tmp_dir):
+def write_to_redshift(glueContext,df, redshift_connection_name, table_name, redshift_tmp_dir):
     """
     Write a PySpark DataFrame to Redshift using an existing Glue connection.
 
