@@ -12,7 +12,7 @@ import pandas as pd
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 import logging
 logger = logging.getLogger(__name__)
-logger.info(args)
+# logger.info(args)
 from pyspark.sql.functions import col
 def read_data_from_s3(file_path, file_format, file_options):
     if file_format.lower() == 'csv':
