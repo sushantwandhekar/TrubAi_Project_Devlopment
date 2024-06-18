@@ -164,7 +164,7 @@ def main(job_name):
         except Exception as e:
             print("Error comparing scripts:", str(e))
 
-job_name = 'transit_zone_etl'
+# job_name = 'transit_zone_etl'
 main(job_name)
 
 # if __name__ == "__main__":
