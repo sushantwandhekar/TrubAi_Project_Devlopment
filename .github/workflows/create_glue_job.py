@@ -2,13 +2,19 @@ import boto3
 import hashlib
 import os
 import time
+import sys
 
 def job_exists(glue_client, job_name):
     """
-        function will check if the job_name is same as the passed job name in the function call
-        params:
-            glue_client: boto3 will retrive the glue client
-            job_name: job_name /file name of the ETL job 
+    Check if the Glue job with the given name exists.
+
+    Parameters:
+    glue_client (boto3.client): The Boto3 Glue client.
+    job_name (str): The name of the Glue job.
+
+    Returns:
+    bool: True if the job exists, False otherwise.
+    dict or None: Job details if it exists, None otherwise.
     """
     try:
         response = glue_client.get_job(JobName=job_name)
@@ -17,18 +23,20 @@ def job_exists(glue_client, job_name):
         return False, None
 
 
-def create_glue_job(job_name, script_location, role_arn, glue_client,glue_connection_list,extra_python_files):
+def create_glue_job(job_name, script_location, role_arn, glue_client, glue_connection_list, extra_python_files):
     """
-        function whill create the glue job using boto3
+    Create a new Glue job.
 
-        params:
-            job_name : job_name /file name of the ETL job 
-            script_location : fetch from secret variables , it is the S3 path of the ETL_Job where we upload all our scripts
-            role_arn: AWS role arn
-            glue_client : boto3 will retrive the glue client
-            glue_connection_list: it must be in list format even if there is only one connection
-            extra_python_file : utils.zip folder S3 path , this folder contain our common functions 
+    Parameters:
+    job_name (str): The name of the Glue job.
+    script_location (str): The S3 path where the job script is located.
+    role_arn (str): The ARN of the IAM role to be used by the Glue job.
+    glue_client (boto3.client): The Boto3 Glue client.
+    glue_connection_list (list): List of Glue connection names.
+    extra_python_files (str): S3 path to additional Python files.
 
+    Returns:
+    None
     """
     try:
         response = glue_client.create_job(
@@ -45,7 +53,8 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,glue_connec
             },
             Connections={
                 'Connections': glue_connection_list
-            },GlueVersion='4.0',
+            },
+            GlueVersion='4.0',
             WorkerType='G.1X',
             NumberOfWorkers=2,
             Timeout=120,
@@ -55,19 +64,20 @@ def create_glue_job(job_name, script_location, role_arn, glue_client,glue_connec
     except Exception as e:
         print("Error creating Glue ETL Job:", str(e))
 
-def update_glue_job(job_name,script_location, role_arn, glue_client,glue_connection_list,extra_python_files):
+def update_glue_job(job_name, script_location, role_arn, glue_client, glue_connection_list, extra_python_files):
     """
-        function will create the existing glue job
-        it will overwrite the actual script of the job, also add the basic_parameters if not added previously
+    Update an existing Glue job.
 
-        params:
-            job_name : job_name /file name of the ETL job 
-            script_location : fetch from secret variables , it is the S3 path of the ETL_Job where we upload all our scripts
-            role_arn: AWS role arn
-            glue_client : boto3 will retrive the glue client
-            glue_connection_list: it must be in list format even if there is only one connection
-            extra_python_file : utils.zip folder S3 path , this folder contain our common functions 
+    Parameters:
+    job_name (str): The name of the Glue job.
+    script_location (str): The S3 path where the job script is located.
+    role_arn (str): The ARN of the IAM role to be used by the Glue job.
+    glue_client (boto3.client): The Boto3 Glue client.
+    glue_connection_list (list): List of Glue connection names.
+    extra_python_files (str): S3 path to additional Python files.
 
+    Returns:
+    None
     """
     try:
         response = glue_client.update_job(
@@ -75,7 +85,7 @@ def update_glue_job(job_name,script_location, role_arn, glue_client,glue_connect
             JobUpdate={
                 'Role': role_arn,
                 'Command': {
-                    'Name': job_name,
+                    'Name': job_name + '.py',
                     'ScriptLocation': script_location,
                     'PythonVersion': '3'
                 },
@@ -83,9 +93,10 @@ def update_glue_job(job_name,script_location, role_arn, glue_client,glue_connect
                     '--job-language': 'python',
                     '--extra-py-files': extra_python_files
                 },
-                'Connections':{
+                'Connections': {
                     'Connections': glue_connection_list
-                },'WorkerType': 'G.1X',
+                },
+                'WorkerType': 'G.1X',
                 'NumberOfWorkers': 2,
                 'GlueVersion': '4.0',
                 'Timeout': 120,
@@ -94,7 +105,7 @@ def update_glue_job(job_name,script_location, role_arn, glue_client,glue_connect
         print("Glue ETL Job updated successfully:", response['JobName'])
     except Exception as e:
         print("Error updating Glue ETL Job:", str(e))
-        
+
 def calculate_s3_object_md5(s3_client, bucket_name, key):
     """
     Calculate the MD5 hash of an object stored in an S3 bucket.
@@ -129,7 +140,15 @@ def calculate_file_md5(file_path):
 
 
 def main(job_name):
-    
+    """
+    Main function to orchestrate Glue job creation or update.
+
+    Parameters:
+    job_name (str): The name of the Glue job.
+
+    Returns:
+    None
+    """
     s3_bucket_name = os.getenv('S3_BUCKET_NAME')
     glue_connection_list = os.getenv('GLUE_CONNECTION_LIST').split(',')
     extra_python_files = os.getenv('EXTRA_PYTHON_FILES')
@@ -137,7 +156,6 @@ def main(job_name):
     role_arn = os.getenv('ROLE_ARN')
     region_name = os.getenv('REGION_NAME')
 
-    
     s3_key = f"glue_cicd_automation/ETL_Jobs/{job_name}.py"
     local_script_path = f".github/workflows/etljobs/{job_name}.py"
     glue_client = boto3.client('glue', region_name=region_name)
@@ -148,24 +166,24 @@ def main(job_name):
 
     if not exists:
         # Job does not exist, create it
-        create_glue_job(job_name, script_location, role_arn,glue_client,glue_connection_list, extra_python_files)
+        create_glue_job(job_name, script_location, role_arn, glue_client, glue_connection_list, extra_python_files)
     else:
         try:
             current_script_md5 = calculate_s3_object_md5(s3_client, s3_bucket_name, s3_key)
-            print(current_script_md5)
             new_script_md5 = calculate_file_md5(local_script_path)
-            print(new_script_md5)
-            time.sleep(10)
+            
             if current_script_md5 != new_script_md5:
                 # Update the job with the new script location
-                update_glue_job(job_name, script_location, role_arn,glue_client,glue_connection_list,extra_python_files)
+                update_glue_job(job_name, script_location, role_arn, glue_client, glue_connection_list, extra_python_files)
             else:
                 print("Job already exists with the same script. No update needed.")
         except Exception as e:
             print("Error comparing scripts:", str(e))
 
-# job_name = 'transit_zone_etl'
-main(job_name)
-
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python create_glue_job.py <job_name>")
+        sys.exit(1)
+    
+    job_name = sys.argv[1]
+    main(job_name)
