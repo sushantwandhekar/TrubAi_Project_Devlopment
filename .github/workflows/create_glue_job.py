@@ -55,8 +55,8 @@ def create_glue_job(job_name, script_location, role_arn, glue_client, glue_conne
                 'Connections': glue_connection_list
             },
             GlueVersion='4.0',
-            WorkerType='G.1X',
-            NumberOfWorkers=2,
+            WorkerType='G.8X',
+            NumberOfWorkers=10,
             Timeout=120,
             MaxRetries=0
         )
@@ -96,8 +96,8 @@ def update_glue_job(job_name, script_location, role_arn, glue_client, glue_conne
                 'Connections': {
                     'Connections': glue_connection_list
                 },
-                'WorkerType': 'G.1X',
-                'NumberOfWorkers': 2,
+                'WorkerType': 'G.8X',
+                'NumberOfWorkers': 10,
                 'GlueVersion': '4.0',
                 'Timeout': 120,
             }
