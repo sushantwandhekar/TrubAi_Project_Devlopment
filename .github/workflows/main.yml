@@ -22,14 +22,12 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-
-    - name: sync ETL file 
+    - name: Sync ETL file to S3
       run: aws s3 sync jobs s3://data-ingestion-bucket-trubai-dev/glue_cicd_automation/ETL_Jobs/
 
     - name: Zip files
       run: |
         zip -r utils.zip utils 
-      # Replace '.github/workflows' with the path to your scripts folder
 
     - name: Sync Zip folder to S3
       run: aws s3 cp utils.zip s3://data-ingestion-bucket-trubai-dev/trubai-gov-data-engineering/development/python_library/
@@ -42,8 +40,14 @@ jobs:
         echo "REGION_NAME=${{ secrets.REGION_NAME }}" >> $GITHUB_ENV
         echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> $GITHUB_ENV
       
-    - name: install boto3
+    - name: Install boto3
       run: pip install boto3
       
+    - name: Get job name from 'jobs' directory
+      id: get_job_name
+      run: |
+        job_name=$(basename $(find jobs -type f -name "*.py" -print -quit))
+        echo "JOB_NAME=${job_name%.*}" >> $GITHUB_ENV
+
     - name: Create Glue ETL Job
-      run: python .github/workflows/create_glue_job.py # Replace this with the command to execute your Python script for creating the Glue ETL job
+      run: python .github/workflows/create_glue_job.py ${{ env.JOB_NAME }}
