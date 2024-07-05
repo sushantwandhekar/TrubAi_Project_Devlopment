@@ -86,3 +86,55 @@ def convert_to_timestamp(df, datetime_columns):
     for old_col, new_col, data_type in datetime_columns:
         df = df.withColumn(new_col, to_timestamp(col(new_col),'MM/dd/yyyy hh:mm:ss a'))
     return df
+
+def get_secret():
+    """
+    Function will return the secrets fetched from the secret_name
+    """
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=SECRET_NAME
+        )
+    except Exception as e:
+        raise e
+
+    secret = get_secret_value_response['SecretString']
+    return json.loads(secret)
+    
+
+def camel_to_snake(name: str) -> str:
+    """
+    Convert camelCase or PascalCase to snake_case.
+    """
+    # Step 1: Normalize underscores and dashes to underscores
+    name = name.replace("-", "_")
+    
+    # Step 2: Insert underscore between number and capital letter
+    name = re.sub(r'([0-9])([A-Z])', r'\1_\2', name)
+    
+    # Step 3: Insert underscore before each capital letter, if not already there
+    name = re.sub(r'([a-z])([A-Z])', r'\1_\2', name)
+    
+    # Step 4: Convert entire string to lowercase
+    name = name.lower()
+    print(name)
+    # Step 5: Return the snake-cased string
+    return name
+    
+def rename_columns(df: DataFrame, renamed_columns: list) -> DataFrame:
+    """
+    Rename columns in the DataFrame based on the provided list of old and new column names.
+    
+    Parameters:
+    df (DataFrame): Spark DataFrame whose columns are to be renamed.
+    renamed_columns (list): List of tuples containing old column name and new column name.
+    
+    Returns:
+    DataFrame: DataFrame with columns renamed.
+    """
+    for old_col, new_col in renamed_columns:
+        if old_col in df.columns:
+            df = df.withColumnRenamed(old_col, new_col)
+        else:
+            print(f"Warning: Column {old_col} does not exist in the DataFrame.")
+    return df
