@@ -11,6 +11,7 @@ from pyspark.sql.functions import col
 import pandas as pd
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 import logging
+import re
 logger = logging.getLogger(__name__)
 # logger.info(args)
 from pyspark.sql.functions import col
