@@ -102,7 +102,7 @@ def get_secret():
     return json.loads(secret)
     
 
-def camel_to_snake(name: str) -> str:
+def camel_to_snake(name):
     """
     Convert camelCase or PascalCase to snake_case.
     """
@@ -121,7 +121,7 @@ def camel_to_snake(name: str) -> str:
     # Step 5: Return the snake-cased string
     return name
     
-def rename_columns(df: DataFrame, renamed_columns: list) -> DataFrame:
+def rename_columns(df, renamed_columns):
     """
     Rename columns in the DataFrame based on the provided list of old and new column names.
     
