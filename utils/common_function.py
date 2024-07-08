@@ -15,14 +15,17 @@ import re
 logger = logging.getLogger(__name__)
 # logger.info(args)
 from pyspark.sql.functions import col
-def read_data_from_s3(spark,file_path, file_format, file_options):
+def read_data_from_s3(spark, file_path, file_format, file_options=None):
     if file_format.lower() == 'csv':
         logger.info('Observed CSV file format')
         df = spark.read.options(**file_options).csv(file_path)
         df.printSchema()
     elif file_format.lower() == 'parquet':
         logger.info('Observed Parquet file format')
-        df = spark.read.parquet(file_path)
+        if file_options is None:
+            df = spark.read.parquet(file_path)
+        else:
+            df = spark.read.options(**file_options).parquet(file_path)
         df.printSchema()
     else:
         raise ValueError("Unsupported file format")
