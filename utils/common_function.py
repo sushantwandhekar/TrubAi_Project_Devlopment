@@ -15,7 +15,7 @@ import re
 logger = logging.getLogger(__name__)
 # logger.info(args)
 from pyspark.sql.functions import col
-def read_data_from_s3(file_path, file_format, file_options):
+def read_data_from_s3(spark,file_path, file_format, file_options):
     if file_format.lower() == 'csv':
         logger.info('Observed CSV file format')
         df = spark.read.options(**file_options).csv(file_path)
