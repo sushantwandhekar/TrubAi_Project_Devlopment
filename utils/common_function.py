@@ -1,5 +1,5 @@
-from awsglue.transforms import DynamicFrame
 from awsglue.context import GlueContext
+from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_timestamp
 import pandas as pd
