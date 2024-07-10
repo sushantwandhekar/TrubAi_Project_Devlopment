@@ -1,3 +1,5 @@
+from awsglue.transforms import *
+from awsglue import DynamicFrame
 from awsglue.context import GlueContext
 from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql import SparkSession
