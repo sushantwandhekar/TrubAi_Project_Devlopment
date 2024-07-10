@@ -9,11 +9,25 @@ import logging
 import json
 import re
 import boto3
+from urllib.parse import urlparse
+from io import BytesIO
+import pyspark.pandas as ps
+
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 
 def read_data_from_s3(spark,file_path, file_format, file_options=None):
+    """
+    Reads the data from AWS S3 
+    Returns Pyspark data frame
+    
+    Parameters: 
+        spark: spark session
+        file_path : s3_file path
+        file_format: file format as per extension csv,parquet,xls,xlsx,excel
+        file_option: extra options to read files
+    """
     if file_options is None:
         file_options = {}
 
@@ -26,12 +40,41 @@ def read_data_from_s3(spark,file_path, file_format, file_options=None):
     elif file_format.lower() in ['xls', 'xlsx', 'excel']:
         logger.info(f'Observed {file_format.upper()} file format')
         # Read Excel file with pandas
-        df = pd.read_excel(file_path, **file_options)
+        df = handle_excel_file(file_path)
     else:
         raise ValueError("Unsupported file format")
     
     # df.printSchema()
     return df
+    
+def handle_excel_file(file_path):
+    """
+        Handles the Excel files
+        return the Pyspark data frame
+        
+        Parameters:
+            file_path : s3_file path 
+    """
+    # Initialize Spark session
+    spark = SparkSession.builder.appName("ExcelFileHandler").getOrCreate()
+    
+    # Parse the S3 path to get bucket name and file key
+    parsed_url = urlparse(file_path)
+    bucket_name = parsed_url.netloc
+    file_key = parsed_url.path.strip('/')
+    
+    # Read the file from S3
+    s3 = boto3.client('s3')
+    obj = s3.get_object(Bucket=bucket_name, Key=file_key)
+    body = obj['Body'].read()
+    
+    # Load the Excel file content into a pandas-on-Spark DataFrame
+    pandas_on_spark_df = ps.read_excel(BytesIO(body))
+    
+    # Convert the pandas-on-Spark DataFrame to a Spark DataFrame
+    spark_df = pandas_on_spark_df.to_spark()
+    
+    return spark_df
 
 
 def write_to_redshift(glueContext,df, redshift_connection_name, table_name, redshift_tmp_dir):
