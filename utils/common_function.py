@@ -47,7 +47,7 @@ def read_data_from_s3(spark,file_path, file_format, file_options=None):
     # df.printSchema()
     return df
     
-def handle_excel_file(file_path):
+def handle_excel_file(spark,file_path):
     """
         Handles the Excel files
         return the Pyspark data frame
@@ -56,7 +56,7 @@ def handle_excel_file(file_path):
             file_path : s3_file path 
     """
     # Initialize Spark session
-    spark = SparkSession.builder.appName("ExcelFileHandler").getOrCreate()
+    # spark = SparkSession.builder.appName("ExcelFileHandler").getOrCreate()
     
     # Parse the S3 path to get bucket name and file key
     parsed_url = urlparse(file_path)
