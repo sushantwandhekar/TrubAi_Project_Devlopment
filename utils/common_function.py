@@ -1,32 +1,36 @@
-from awsglue.transforms import *
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
+from awsglue.transforms import DynamicFrame
 from awsglue.context import GlueContext
-from awsglue.job import Job
-from awsglue import DynamicFrame
-import boto3
-import json
-import sys
-from pyspark.sql.functions import col
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, to_timestamp
 import pandas as pd
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 import logging
+import json
 import re
+import boto3
+
+# Initialize logger
 logger = logging.getLogger(__name__)
-# logger.info(args)
-from pyspark.sql.functions import col
-def read_data_from_s3(spark,file_path, file_format, file_options):
+
+def read_data_from_s3(spark,file_path, file_format, file_options=None):
+    if file_options is None:
+        file_options = {}
+
     if file_format.lower() == 'csv':
         logger.info('Observed CSV file format')
         df = spark.read.options(**file_options).csv(file_path)
-        df.printSchema()
     elif file_format.lower() == 'parquet':
         logger.info('Observed Parquet file format')
         df = spark.read.parquet(file_path)
-        df.printSchema()
+    elif file_format.lower() in ['xls', 'xlsx', 'excel']:
+        logger.info(f'Observed {file_format.upper()} file format')
+        # Read Excel file with pandas
+        df = pd.read_excel(file_path, **file_options)
     else:
         raise ValueError("Unsupported file format")
+    
+    # df.printSchema()
     return df
+
 
 def write_to_redshift(glueContext,df, redshift_connection_name, table_name, redshift_tmp_dir):
     """
@@ -37,9 +41,6 @@ def write_to_redshift(glueContext,df, redshift_connection_name, table_name, reds
         redshift_connection_name (str): Name of the Glue connection configured for Redshift.
         table_name (str): Name of the Redshift table to write data into.
         redshift_tmp_dir(str): s3 directory path to redshift temp storage.
-        mode (str, optional): Specifies the behavior when data or table already exists. 
-            Must be one of "append", "overwrite", "ignore", or "error". 
-            Defaults to "overwrite".
     """
     
     # Convert the Spark DataFrame to a Glue DynamicFrame
@@ -57,32 +58,39 @@ def write_to_redshift(glueContext,df, redshift_connection_name, table_name, reds
     
     return
 
-def rename_and_cast_columns(df, columns_cast_mappings):
+def rename_columns(df, columns_cast_mappings):
     """
-    Rename and cast multiple columns in a PySpark DataFrame.
-
+    Rename columns in the DataFrame based on the provided list of old and new column names.
+    
     Parameters:
-        df (DataFrame): The original PySpark DataFrame.
-        columns_cast_mappings (list): A list of tuples where each tuple contains the old column name and the new column name and the target data type.
-
+    df (DataFrame): Spark DataFrame whose columns are to be renamed.
+    columns_cast_mappings (list): List of tuples containing old column name, new column name, 
+                                  and optionally data type.
+    
     Returns:
-        DataFrame: The DataFrame with renamed and casted columns.
+    DataFrame: DataFrame with columns renamed.
     """
-    
-    # Rename columns
-    for old_col, new_col, data_type in columns_cast_mappings:
-        df = df.withColumnRenamed(old_col, new_col)
-    
-    # Cast columns
+    for mapping in columns_cast_mappings:
+        if len(mapping) == 2:
+            old_column, new_column = mapping
+        elif len(mapping) == 3:
+            old_column, new_column, _ = mapping
+        else:
+            print(f"Warning: Invalid mapping {mapping}.")
+            continue
+
+        if old_column in df.columns:
+            df = df.withColumnRenamed(old_column, new_column)
+        else:
+            print(f"Warning: Column {old_column} does not exist in the DataFrame.")
+    return df
+
+def cast_columns(df, columns_cast_mappings):
     for old_col, new_col, data_type in columns_cast_mappings:
         df = df.withColumn(new_col, col(new_col).cast(data_type))
-    
     return df
 
 def convert_to_timestamp(df, datetime_columns):
-    for old_col, new_col, data_type in datetime_columns:
-        df = df.withColumnRenamed(old_col, new_col)
-    
     # Cast columns
     for old_col, new_col, data_type in datetime_columns:
         df = df.withColumn(new_col, to_timestamp(col(new_col),'MM/dd/yyyy hh:mm:ss a'))
@@ -122,20 +130,3 @@ def camel_to_snake(name):
     # Step 5: Return the snake-cased string
     return name
     
-def rename_columns(df, renamed_columns):
-    """
-    Rename columns in the DataFrame based on the provided list of old and new column names.
-    
-    Parameters:
-    df (DataFrame): Spark DataFrame whose columns are to be renamed.
-    renamed_columns (list): List of tuples containing old column name and new column name.
-    
-    Returns:
-    DataFrame: DataFrame with columns renamed.
-    """
-    for old_col, new_col in renamed_columns:
-        if old_col in df.columns:
-            df = df.withColumnRenamed(old_col, new_col)
-        else:
-            print(f"Warning: Column {old_col} does not exist in the DataFrame.")
-    return df
