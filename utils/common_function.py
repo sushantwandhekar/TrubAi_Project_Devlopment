@@ -11,7 +11,7 @@ import re
 import boto3
 from urllib.parse import urlparse
 from io import BytesIO
-import pyspark.pandas as ps
+import pandas as pd
 
 
 # Initialize logger
