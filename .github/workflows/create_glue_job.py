@@ -55,10 +55,10 @@ def create_glue_job(job_name, script_location, role_arn, glue_client, glue_conne
                 'Connections': glue_connection_list
             },
             GlueVersion='4.0',
-            WorkerType='G.8X',
-            NumberOfWorkers=10,
+            WorkerType='G.1X',
+            NumberOfWorkers=5,
             Timeout=120,
-            MaxRetries=0
+            MaxRetries=1
         )
         print("Glue ETL Job created successfully:", response['Name'])
     except Exception as e:
